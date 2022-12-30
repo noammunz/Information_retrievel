@@ -24,7 +24,7 @@ client = storage.Client()
 # Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
 # bm25_body = BM25_from_index(idx_body)
 
-idx_body_simple.DL=idx_body.DL
+# idx_body_simple.DL=idx_body.DL
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, **options):
         super(MyFlaskApp, self).run(host=host, port=port, debug=debug, **options)
