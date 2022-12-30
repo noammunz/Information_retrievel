@@ -11,18 +11,18 @@ import json
 nltk.download('stopwords')
 
 client = storage.Client()
-bucket = client.get_bucket('all_pkl')
-idx_title = pickle.loads(bucket.get_blob('index_title_inverted_index.pkl').download_as_string())
-idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
-idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
-idx_body2 = pickle.loads(bucket.get_blob('index_body2_inverted_index.pkl').download_as_string())
-idx_title_simple = pickle.loads(bucket.get_blob('index_simple_title_inverted_index.pkl').download_as_string())
-idx_body_simple = pickle.loads(bucket.get_blob('index_simple_body_inverted_index.pkl').download_as_string())
-idx_anchor = pickle.loads(bucket.get_blob('index_anchor_bucket.pkl').download_as_string())
-pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
-pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
-Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-bm25_body = BM25_from_index(idx_body)
+# bucket = client.get_bucket('all_pkl')
+# idx_title = pickle.loads(bucket.get_blob('index_title_inverted_index.pkl').download_as_string())
+# idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
+# idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
+# idx_body2 = pickle.loads(bucket.get_blob('index_body2_inverted_index.pkl').download_as_string())
+# idx_title_simple = pickle.loads(bucket.get_blob('index_simple_title_inverted_index.pkl').download_as_string())
+# idx_body_simple = pickle.loads(bucket.get_blob('index_simple_body_inverted_index.pkl').download_as_string())
+# idx_anchor = pickle.loads(bucket.get_blob('index_anchor_bucket.pkl').download_as_string())
+# pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
+# pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
+# Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
+# bm25_body = BM25_from_index(idx_body)
 
 idx_body_simple.DL=idx_body.DL
 class MyFlaskApp(Flask):
@@ -58,9 +58,9 @@ def search():
     # BEGIN SOLUTION
     # res = GetResult(query, idx_title, idx_title2, idx_body, idx_body2, bm25_body, pr, pv)[:100]
     # res = _idToValuesMapping(res)
-    #res = [(1,"Hello"),(2,"World"),(3,query)]
-    res = GetResult(query, idx_title, idx_title2, idx_body, idx_body2, bm25_body, pr, pv)[:100]
-    res = _idToValuesMapping(res)
+    res = [(1,"Hello"),(2,"World"),(3,query)]
+#     res = GetResult(query, idx_title, idx_title2, idx_body, idx_body2, bm25_body, pr, pv)[:100]
+#     res = _idToValuesMapping(res)
     # END SOLUTION
     return jsonify(res)
 
