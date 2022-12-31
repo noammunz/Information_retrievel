@@ -37,7 +37,8 @@ idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index
 
 bucket = client.get_bucket('bx_general_bucket')
 pv = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
-pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
+# pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
+pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz')
 # bucket = client.get_bucket('bx_body_index')
 # idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
 
