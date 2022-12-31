@@ -11,8 +11,18 @@ import json
 nltk.download('stopwords')
 
 client = storage.Client()
-# bucket = client.get_bucket('all_pkl')
-# idx_title = pickle.loads(bucket.get_blob('index_title_inverted_index.pkl').download_as_string())
+bucket = client.get_bucket('bx_title_index')
+idx_title = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
+
+bucket = client.get_bucket('bx_body_index')
+idx_body = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
+
+bucket = client.get_bucket('bx_title_bigram_index')
+idx_title2 = pickle.loads(bucket.get_blob('bx_title_bigram_index_index.pkl').download_as_string())
+
+bucket = client.get_bucket('bx_body_bigram_index')
+idx_title2 = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
+
 # idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
 # idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
 # idx_body2 = pickle.loads(bucket.get_blob('index_body2_inverted_index.pkl').download_as_string())
@@ -31,6 +41,10 @@ class MyFlaskApp(Flask):
 
 app = MyFlaskApp(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
+
+def load_files_from_buckets():
+  bucket = client.get_bucket('bx_body_index')
 
 
 @app.route("/search")
