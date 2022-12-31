@@ -36,10 +36,10 @@ idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index
 # idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
 
 bucket = client.get_bucket('bx_general_bucket')
-idx_body_simple = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
-
-bucket = client.get_bucket('bx_body_index')
-pv = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
+pv = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
+pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
+# bucket = client.get_bucket('bx_body_index')
+# idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
 
 # idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
 # idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
