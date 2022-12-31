@@ -50,7 +50,7 @@ pv = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').downlo
 # pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
 # pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
 # Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-bm25_body = BM25_from_index(idx_body)
+# bm25_body = BM25_from_index(idx_body)
 
 # idx_body_simple.DL=idx_body.DL
 class MyFlaskApp(Flask):
