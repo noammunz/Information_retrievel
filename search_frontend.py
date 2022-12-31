@@ -10,9 +10,9 @@ from nltk.corpus import stopwords
 import json
 nltk.download('stopwords')
 
-# client = storage.Client()
-# bucket = client.get_bucket('bx_title_index')
-# idx_title = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
+client = storage.Client()
+bucket = client.get_bucket('bx_title_index')
+idx_title = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
 
 # bucket = client.get_bucket('bx_body_index')
 # idx_body = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
