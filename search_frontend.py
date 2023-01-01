@@ -60,7 +60,7 @@ pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-2f9e05b1-4078-4874-8097-1
 # pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
 
 # Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-print('idx_body.DL {}'.format(idx_body.DL))
+print('idx_body.DL {}'.format(idx_body.dl))
 print('building bm25 class')
 bm25_body = BM25_from_index(idx_body)
 
