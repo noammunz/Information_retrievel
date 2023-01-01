@@ -11,30 +11,38 @@ import json
 nltk.download('stopwords')
 
 client = storage.Client()
+print('loading bx_title_index')
 bucket = client.get_bucket('bx_title_index')
 idx_title = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
 
+print('loading bx_body_index')
 bucket = client.get_bucket('bx_body_index')
 idx_body = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
 
+print('loading bx_title_bigram_index')
 bucket = client.get_bucket('bx_title_bigram_index')
 idx_title2 = pickle.loads(bucket.get_blob('postings_gcp/bx_title_bigram_index_index.pkl').download_as_string())
 
+print('loading bx_body_bigram_index')
 bucket = client.get_bucket('bx_body_bigram_index')
 idx_title2 = pickle.loads(bucket.get_blob('postings_gcp/bx_body_bigram_index_index.pkl').download_as_string())
 
+print('loading bx_body_bigram_index')
 bucket = client.get_bucket('bx_body_bigram_index')
 idx_body2 = pickle.loads(bucket.get_blob('postings_gcp/bx_body_bigram_index_index.pkl').download_as_string())
 
+print('loading bx_title_index')
 bucket = client.get_bucket('bx_title_index')
 idx_title_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
 
+print('loading bx_body_index')
 bucket = client.get_bucket('bx_body_index')
 idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
 
 # bucket = client.get_bucket('bx_anchor_index')
 # idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
 
+print('loading bx_general_bucket')
 bucket = client.get_bucket('bx_general_bucket')
 pv = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
 # pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
@@ -50,9 +58,10 @@ pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-a5ad5b2e-27ae-46dc-b038-3
 # idx_anchor = pickle.loads(bucket.get_blob('index_anchor_bucket.pkl').download_as_string())
 # pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
 # pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
-# Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-bm25_body = BM25_from_index(idx_body)
 
+# Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
+print('building bm25 class')
+bm25_body = BM25_from_index(idx_body)
 
 idx_body_simple.DL=idx_body.DL
 
