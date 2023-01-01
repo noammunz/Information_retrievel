@@ -14,30 +14,33 @@ client = storage.Client()
 print('loading bx_title_index')
 bucket = client.get_bucket('bx_title_index')
 idx_title = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
+idx_title.DL = idx_title.dl
 
 print('loading bx_body_index')
 bucket = client.get_bucket('bx_body_index')
 idx_body = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
+idx_body.DL = idx_body.dl
 
 print('loading bx_title_bigram_index')
 bucket = client.get_bucket('bx_title_bigram_index')
 idx_title2 = pickle.loads(bucket.get_blob('postings_gcp/bx_title_bigram_index_index.pkl').download_as_string())
-
-print('loading bx_body_bigram_index')
-bucket = client.get_bucket('bx_body_bigram_index')
-idx_title2 = pickle.loads(bucket.get_blob('postings_gcp/bx_body_bigram_index_index.pkl').download_as_string())
+idx_title2.DL = idx_title2.dl
 
 print('loading bx_body_bigram_index')
 bucket = client.get_bucket('bx_body_bigram_index')
 idx_body2 = pickle.loads(bucket.get_blob('postings_gcp/bx_body_bigram_index_index.pkl').download_as_string())
+idx_body2.DL = idx_body2.dl
+
 
 print('loading bx_title_index')
 bucket = client.get_bucket('bx_title_index')
 idx_title_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_title_index_index.pkl').download_as_string())
+idx_title_simple.DL = idx_title_simple.dl
 
 print('loading bx_body_index')
 bucket = client.get_bucket('bx_body_index')
 idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
+idx_body_simple.DL = idx_body_simple.dl
 
 # bucket = client.get_bucket('bx_anchor_index')
 # idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
@@ -60,11 +63,11 @@ pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-2f9e05b1-4078-4874-8097-1
 # pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
 
 # Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-print('idx_body.DL {}'.format(idx_body.dl))
+# print('idx_body.DL {}'.format(idx_body.dl))
 print('building bm25 class')
 bm25_body = BM25_from_index(idx_body)
 
-idx_body_simple.DL=idx_body.DL
+# idx_body_simple.DL=idx_body.dl
 
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, **options):
