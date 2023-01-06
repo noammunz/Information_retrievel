@@ -16,7 +16,6 @@ bucket = client.get_bucket('bx_pickles')
 idx_title = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
 
 print('loading bx_body_index')
-bucket = client.get_bucket('bx_body_index')
 idx_body = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
 
 print('loading bx_title_bigram_index')
