@@ -14,21 +14,27 @@ client = storage.Client()
 print('loading bx_title_index')
 bucket = client.get_bucket('bx_pickles')
 idx_title = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
+idx_title.DL = idx_title.dl
 
 print('loading bx_body_index')
 idx_body = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
+idx_body.DL = idx_body.dl
 
 print('loading bx_title_bigram_index')
 idx_title2 = pickle.loads(bucket.get_blob('bx_title_bigram_index_index.pkl').download_as_string())
+idx_title2.DL = idx_title2.dl
 
 print('loading bx_body_bigram_index')
 idx_body2 = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
+idx_body2.DL = idx_body2.dl
 
 print('loading bx_title_index')
 idx_title_simple = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
+idx_title_simple.DL = idx_title_simple.dl
 
 print('loading bx_body_index')
 idx_body_simple = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
+idx_body_simple.DL = idx_body_simple.dl
 
 # bucket = client.get_bucket('bx_anchor_index')
 # idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
