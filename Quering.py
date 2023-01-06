@@ -137,7 +137,7 @@ def calc_tf_idf(doc_id, query, inverted_index, word_dict):
 
 
 def get_page_rank(relevant_docs, pr):
-    return list(pr[pr[0].isin(relevant_docs)].itertuples(index=False, name=None))
+    return list(pr[pr['doc_id'].isin(relevant_docs)].itertuples(index=False, name=None))
 
 
 def get_page_view(relevant_docs, wid2pv):
