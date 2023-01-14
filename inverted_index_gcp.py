@@ -79,9 +79,9 @@ class MultiFileReader:
             f_name= loc[0]
             offset = loc[1]
             
-            if (path.exists(f'{bucket_name}/postings_gcp/{f_name}')):
+            if (path.exists(f'/mnt/disks/data/{bucket_name}/postings_gcp/{f_name}')):
                 # open using local file
-                with open(f'{bucket_name}/postings_gcp/{f_name}', "rb") as f:
+                with open(f'/mnt/disks/data/{bucket_name}/postings_gcp/{f_name}', "rb") as f:
                     f.seek(offset)
                     n_read = min(n_bytes, BLOCK_SIZE - offset)
                     b.append(f.read(n_read))
@@ -96,7 +96,7 @@ class MultiFileReader:
                 # save file
                 if (is_save_to_local):
                     for f_name in f_names:
-                        folder_path =f'{bucket_name}/postings_gcp/'
+                        folder_path =f'/mnt/disks/data/{bucket_name}/postings_gcp/'
                         isExist = os.path.exists(folder_path)
                         if not isExist:
                             os.makedirs(folder_path)
@@ -109,7 +109,7 @@ class MultiFileReader:
                         blob = bucket.blob(f'postings_gcp/{f_name}')
                         # Download the file to a destination
         #                 print(f'postings_gcp/{f_name}')
-                        blob.download_to_filename(f'{bucket_name}/postings_gcp/{f_name}')
+                        blob.download_to_filename(f'/mnt/disks/data/{bucket_name}/postings_gcp/{f_name}')
 
         return b''.join(b)
   
