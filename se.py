@@ -1,13 +1,20 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+import sys
+import os
+
+from sklearn.feature_extraction.text import TfidfVectorizer
 from collections import defaultdict,Counter
 import re
+
 import nltk
-import pickle
-import numpy as np
+from nltk.stem.porter import *
 from nltk.corpus import stopwords
-from tqdm import tqdm
+from nltk.util import ngrams
+
+import pickle
+
 import operator
 from itertools import islice,count
 from contextlib import closing
@@ -16,27 +23,20 @@ import json
 from io import StringIO
 from pathlib import Path
 from operator import itemgetter
-import pickle
-import matplotlib.pyplot as plt
-import pandas as pd
 from google.cloud import storage
 
-import sys
+
 from collections import Counter, OrderedDict, defaultdict
 import itertools
 from itertools import islice, count, groupby
-import pandas as pd
-import os
-import re
+
+
+
 from operator import itemgetter
-import nltk
-from nltk.stem.porter import *
-from nltk.corpus import stopwords
-from nltk.util import ngrams
+
 from time import time
 from pathlib import Path
-import pickle
-import pandas as pd
+
 from google.cloud import storage
 import time
 import pandas as pd
@@ -49,7 +49,6 @@ import builtins
 import gzip
 import csv
 import io
-from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 from numpy import dot
 from numpy.linalg import norm
@@ -61,14 +60,14 @@ english_stopwords = frozenset(stopwords.words('english'))
 corpus_stopwords = ["category", "references", "also", "external", "links", 
                 "may", "first", "see", "history", "people", "one", "two", 
                 "part", "thumb", "including", "second", "following", 
-                "many", "however", "would", "became", "make"]
+                "many", "however", "would", "became", "make",'accordingly','hence','namely','therefore','thus','consequently','meanwhile','accordingly','likewise',
+                 'similarly','notwithstanding','nonetheless','despite','whereas','furthermore','moreover','nevertheless','although',
+                 'notably','notwithstanding','nonetheless','despite','whereas','furthermore','moreover','notably','hence']
 
 all_stopwords = english_stopwords.union(corpus_stopwords)
 RE_WORD = re.compile(r"""[\#\@\w](['\-]?\w){2,24}""", re.UNICODE)
 
 class search_engine():
-    
-
     
     corpus_size = 6348910
 
@@ -89,7 +88,6 @@ class search_engine():
             
         for term, freq in self.index_dict[index_name].df.items():
             idf = math.log(len(self.index_dict[index_name].dl)/(freq + 0.0000001), 10)
-#             idf = math.log(len(self.index_dict[index_name].DL)/(freq + 0.0000001), 10)
             idf_dict[term] = idf
         return idf_dict
     
@@ -112,7 +110,6 @@ class search_engine():
             print('loading rest of the indecies')
             
             body_index = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
-#             body_index = pickle.loads(bucket.get_blob('bx_body_index2.pkl').download_as_string())
             body_bigram_index = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
             idx_body_nf = pickle.loads(bucket.get_blob('bx_body_index_nf_index.pkl').download_as_string())
             anchor_index = pickle.loads(bucket.get_blob('bx_anchor_index_index.pkl').download_as_string())
@@ -138,19 +135,6 @@ class search_engine():
     
     def init_engine(self,load_only_title=False):
         self.load_all_indecies_from_bucket(load_only_title)
-
-
-    def get_posting_iter(self,index_name):
-        """
-        This function returning the iterator working with posting list.
-
-        Parameters:
-        ----------
-        index: inverted index    
-        """
-        words, pls = zip(*self.index_dict[index_name].posting_lists_iter(self.index_dict[index_name].bucket_name))
-        return words,pls
-    
     
     def get_posting_list(self,index_name, w):
       
@@ -401,15 +385,17 @@ class search_engine():
                            candidates]), N=9999999)
         
     def full_search(self,query):
-        params = {'max_docs_from_binary_title' :1000,
-                  'max_docs_from_binary_body' :1000,
-                  'bm25_body_weight':3.94,
-                  'bm25_title_weight':2.12,
-                  'bm25_body_bi_weight':3.13,
-                  'bm25_title_bi_weight':2.88,
-                  'pr_weight':3.13,
-                  'pv_weight':2.88
-                 }
+        params = {'max_docs_from_binary_title': 4433,
+                    'max_docs_from_binary_body': 1349,
+                    'bm25_body_weight': 5.175842946028495,
+                    'bm25_title_weight': 2.297919942629382,
+                    'bm25_body_bi_weight': 0.9433857458903415,
+                    'bm25_title_bi_weight': 5.43406860036612,
+                    'body_cosine_score': 4.925136475255385,
+                    'title_cosine_score': 0.29963143927827507,
+                    'pr_weight': 0.34839354014586377,
+                    'pv_weight': 4.740913798917137}
+
         return self.full_search_(query,params)
     
     def fast_cosine_search(self,tokens,index_name,N,stem=True,candidates=None,unique_candidates=None):
@@ -427,7 +413,7 @@ class search_engine():
         title_candidates,title_dict = self.get_candidates(tokens,'title_index')
         print('title_candidates:',len(title_candidates))
         
-        body_candidates,body_dict = self.get_candidates(tokens,'body_index_nf')
+        body_candidates,body_dict = self.get_candidates(tokens,'body_index')
         print('body_candidates:',len(body_candidates))
         
         body_candidates_bi_gram,body_bi_gram_dict = self.get_candidates(tokens_bi_gram,'body_bigram_index')
@@ -436,21 +422,24 @@ class search_engine():
         title_candidates_bi_gram,title_bi_gram_dict = self.get_candidates(tokens_bi_gram,'title_bigram_index')
         print('title_candidates_bi_gram:',len(title_candidates_bi_gram))
         
-        anchor_candidates,anchor_dict = self.get_candidates(tokens,'anchor_index')
-        
+        if (len(body_candidates_bi_gram)>200):
+            body_candidates = body_candidates_bi_gram
+            
+#         anchor_candidates,anchor_dict = self.get_candidates(tokens,'anchor_index')
+        anchor_candidates = set()
         
         # step 3 combine results (union or intersection with minimum)
         
         title_candidates = set(list(zip(*self.seach_titles(tokens,title_candidates,title_dict)))[0][:params['max_docs_from_binary_title']])
-        if (len (body_candidates)>0):
+        if (len (body_candidates)>0) and (len(body_candidates_bi_gram)<=200):
             body_candidates =  set(list(zip(*self.search_body(tokens,body_candidates,body_dict)))[0][:params['max_docs_from_binary_body']])
         else:
-            body_candidates = set()
+            body_candidates = body_candidates_bi_gram
             
-        if (len (anchor_candidates)>0):
-            anchor_candidates =  set(list(zip(*self.search_body(tokens,anchor_candidates,anchor_dict)))[0][:0])
-        else:
-            anchor_candidates = set()
+#         if (len (anchor_candidates)>0):
+#             anchor_candidates =  set(list(zip(*self.search_body(tokens,anchor_candidates,anchor_dict)))[0][:0])
+#         else:
+#             anchor_candidates = set()
         
         # cosine similarity section
         # body
@@ -473,16 +462,11 @@ class search_engine():
         # after binary search
         print('after binary search title_candidates:',len(title_candidates))
         print('after binary search body_candidates:',len(body_candidates))
-#         print('after binary search anchor_candidates:',len(anchor_candidates))
         print('anchor_candidates:',len(anchor_candidates))
         
 
         print('cos_candidates_to_add:',len(cos_candidates_to_add))
         
-#         body_candidates = body_candidates.union(title_candidates)
-#         cos_candidates_to_add = cos_candidates_to_add.intersection(cos_ti tle_candidates_to_add)
-#         self.all_relevent_docs_step_1 = body_candidates.union(cos_candidates_to_add)
-            
         self.all_relevent_docs = set().union(*[body_candidates,
                                                title_candidates,
                                                body_candidates_bi_gram,
@@ -492,19 +476,7 @@ class search_engine():
                                                cos_title_candidates_to_add
                                               ])
             
-#         self.all_relevent_docs = set().union(*[body_candidates, 
-#                                                title_candidates,
-#                                                body_candidates_bi_gram,
-#                                                title_candidates_bi_gram,
-#                                                anchor_candidates,
-#                                                cos_candidates_to_add,
-#                                                cos_title_candidates_to_add
-#                                               ])
-#         print(title_candidates)
-#         print(len(body_candidates),len(title_candidates),len(body_candidates_bi_gram),len(title_candidates_bi_gram))
-#         print(len(self.all_relevent_docs))
-        
-        self.bm25_body_score = self.bm25_dict['body_index_nf'].search_with_candidates(tokens,self.all_relevent_docs)
+        self.bm25_body_score = self.bm25_dict['body_index'].search_with_candidates(tokens,self.all_relevent_docs)
         
         self.bm25_title_score = self.bm25_dict['title_index'].search_with_candidates(tokens,self.all_relevent_docs)
         
@@ -546,7 +518,7 @@ class search_engine():
         
         # return norm_scores
 #         return sorted((self.norm_scores.keys()), key=lambda x: np.dot(self.norm_scores[x],self.weights), reverse=True)
-        return sorted([(doc_id,np.dot(self.norm_scores[doc_id],self.weights)) for doc_id, score in self.norm_scores.items()], key = lambda x: x[1],reverse=True)
+        return sorted([(doc_id,np.dot(self.norm_scores[doc_id],self.weights)) for doc_id, score in self.norm_scores.items()], key = lambda x: x[1],reverse=True)[:100]
         
         
     def get_normelize_union(self,all_relevent_docs, *args):
@@ -565,31 +537,6 @@ class search_engine():
                 else:
                     doc_id_score[doc][i] = (feature[doc]- min_val) / interval
         return doc_id_score
-    
-    def cosine_similarity(self,D,Q):
-        """
-        Calculate the cosine similarity for each candidate document in D and a given query (e.g., Q).
-        Generate a dictionary of cosine similarity scores 
-        key: doc_id
-        value: cosine similarity score
-
-        Parameters:
-        -----------
-        D: DataFrame of tfidf scores.
-
-        Q: vectorized query with tfidf scores
-
-        Returns:
-        -----------
-        dictionary of cosine similarity score as follows:
-                                                                    key: document id (e.g., doc_id)
-                                                                    value: cosine similarty score.
-        """
-        # YOUR CODE HERE
-        ret_dict = dict()
-        for index,row in D.iterrows():
-            ret_dict[index] = np.dot(row.values,Q)/(np.linalg.norm(row.values)*np.linalg.norm(Q))
-        return ret_dict
     
     def fast_cosine_calc(self,query_to_search,index_name,candidates=None,unique_candidates=None):
         
@@ -635,59 +582,6 @@ class search_engine():
         """
 
         return sorted([(doc_id,round(score,5)) for doc_id, score in sim_dict.items()], key = lambda x: x[1],reverse=True)[:N]
-    
-
-        
-    
-    def get_topN_score_for_queries_noam(self, queries_to_search,index_name,N=3):
-        ret_dict = dict()
-        for key,value in queries_to_search.items():
-            cs_dict = self.candidates_tfidf_cosine_scores(query=value,index_name=index_name)
-            ret_dict[key] = self.get_top_n(cs_dict,N)
-        return ret_dict
-    
-        
-    def get_topN_score_for_queries(self, queries_to_search,index_name,N=3):
-        """ 
-        Generate a dictionary that gathers for every query its topN score.
-
-        Parameters:
-        -----------
-        queries_to_search: a dictionary of queries as follows: 
-                                                            key: query_id
-                                                            value: list of tokens.
-        index:           inverted index loaded from the corresponding files.    
-        N: Integer. How many documents to retrieve. This argument is passed to the topN function. By default N = 3, for the topN function. 
-
-        Returns:
-        -----------
-        return: a dictionary of queries and topN pairs as follows:
-                                                            key: query_id
-                                                            value: list of pairs in the following format:(doc_id, score). 
-        """
-        
-
-        ret_dict = dict()
-        for key,value in queries_to_search.items():
-            cs_dict = self.fast_cosine_calc(query_to_search=value,index_name=index_name)
-#             print(cs_dict)
-            ret_dict[key] = self.get_top_n(cs_dict,N)
-        return ret_dict
-        
-#         #### Working solution ####
-#         # YOUR CODE HERE
-#         #words,pls = self.get_posting_iter(index)
-# #         print('iter loaded')
-#         ret_dict = dict()
-#         for key,value in queries_to_search.items():
-# #             print(value)
-#             df = self.generate_document_tfidf_matrix(value,index_name)
-#             q_tfidf = self.generate_query_tfidf_vector(value,index_name)
-# #             print(q_tfidf.dtype)
-#             cs_dict = self.cosine_similarity(df,q_tfidf)
-# #             print(cs_dict)
-#             ret_dict[key] = self.get_top_n(cs_dict,N)
-#         return ret_dict
 
 ################################################################ NOAM'S ADDITION
     def titles(self, score_list):
