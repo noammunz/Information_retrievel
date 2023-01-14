@@ -1,5 +1,4 @@
 import sys
-
 from collections import Counter, OrderedDict
 import itertools
 from itertools import islice, count, groupby
@@ -7,16 +6,16 @@ import pandas as pd
 import os
 import re
 from operator import itemgetter
+from time import time
 from pathlib import Path
 import pickle
 from google.cloud import storage
 from collections import defaultdict
 from contextlib import closing
-import builtins
-
+import numpy as np
 client = storage.Client()
-
-# Let's start with a small block size of 30 bytes just to test things out. 
+import gcsfs
+from os import path
 BLOCK_SIZE = 1999998
 
 class MultiFileWriter:
@@ -65,17 +64,53 @@ class MultiFileReader:
     """ Sequential binary reader of multiple files of up to BLOCK_SIZE each. """
     def __init__(self):
         self._open_files = {}
-
-    def read(self, locs, n_bytes, bucket_name):
+        self.client = storage.Client()
+    
+    def read_from_bucket(self,bucket_name,f_name,offset,n_read):
+        fs = gcsfs.GCSFileSystem(project='project-372918')
+        with fs.open(f'{bucket_name}/postings_gcp/{f_name}') as f:
+            f.seek(offset)
+            return f.read(n_read)
+    
+    def read(self,locs,n_bytes,bucket_name,is_save_to_local=True):
         b = []
-        bucket = client.get_bucket(bucket_name)
-        for f_name, offset in locs:
-            blob = bucket.get_blob(f'postings_gcp/{f_name}')
-            pl_bin = blob.download_as_bytes()
-            pl_to_read = pl_bin[offset: builtins.min(offset + n_bytes, BLOCK_SIZE - offset)]
-            n_read = builtins.min(n_bytes, BLOCK_SIZE - offset)
-            b.append(pl_to_read)
-            n_bytes -= n_read
+        f_names = []
+        for loc in locs:
+            f_name= loc[0]
+            offset = loc[1]
+            
+            if (path.exists(f'{bucket_name}/postings_gcp/{f_name}')):
+                # open using local file
+                with open(f'{bucket_name}/postings_gcp/{f_name}', "rb") as f:
+                    f.seek(offset)
+                    n_read = min(n_bytes, BLOCK_SIZE - offset)
+                    b.append(f.read(n_read))
+                    n_bytes -= n_read
+            else:
+                f_names.append(f_name)
+                # open using bucket
+                n_read = min(n_bytes, BLOCK_SIZE - offset)
+                b_to_add = self.read_from_bucket(bucket_name,f_name,offset,n_read)
+                b.append(b_to_add)
+                n_bytes -= n_read
+                # save file
+                if (is_save_to_local):
+                    for f_name in f_names:
+                        folder_path =f'{bucket_name}/postings_gcp/'
+                        isExist = os.path.exists(folder_path)
+                        if not isExist:
+                            os.makedirs(folder_path)
+
+                        # Initialise a client
+                        storage_client = storage.Client('project-372918')
+                        # Create a bucket object for our bucket
+                        bucket = storage_client.get_bucket(bucket_name)
+                        # Create a blob object from the filepath
+                        blob = bucket.blob(f'postings_gcp/{f_name}')
+                        # Download the file to a destination
+        #                 print(f'postings_gcp/{f_name}')
+                        blob.download_to_filename(f'{bucket_name}/postings_gcp/{f_name}')
+
         return b''.join(b)
   
     def close(self):
@@ -96,18 +131,18 @@ TF_MASK = 2 ** 16 - 1 # Masking the 16 low bits of an integer
 
 
 class InvertedIndex:  
-    def __init__(self, bucket_name):
+    def __init__(self, docs={}):
         """ Initializes the inverted index and add documents to it (if provided).
         Parameters:
         -----------
           docs: dict mapping doc_id to list of tokens
         """
-        self.bucket_name = bucket_name
-        self.DL = {}
-        self.DS = {}
-        self.corpus_size = 0
+        # stores the bucket name where the bin files are stored
+        self.bucket_name = 'bucket name'
         # stores document frequency per term
         self.df = Counter()
+        # stores document lengths
+        self.dl = {}
         # stores total frequency per term
         self.term_total = Counter()
         # stores posting list per term while building the index (internally), 
@@ -121,6 +156,9 @@ class InvertedIndex:
         # the number of bytes from the beginning of the file where the posting list
         # starts. 
         self.posting_locs = defaultdict(list)
+
+        for doc_id, tokens in docs.items():
+            self.add_doc(doc_id, tokens)
 
     def add_doc(self, doc_id, tokens):
         """ Adds a document to the index with a given `doc_id` and tokens. It counts
@@ -152,13 +190,53 @@ class InvertedIndex:
         del state['_posting_list']
         return state
 
-    def posting_lists_iter(self, bucket_name):
+    def get_posting_list(self,index, w):
+      
+      with closing(MultiFileReader()) as reader:
+          locs = index.posting_locs[w]
+          b = reader.read(locs, index.df[w] * TUPLE_SIZE, index.bucket_name)
+          posting_list = []
+          for i in range(index.df[w]):
+              doc_id = int.from_bytes(b[i * TUPLE_SIZE:i * TUPLE_SIZE + 4], 'big')
+              tf = int.from_bytes(b[i * TUPLE_SIZE + 4:(i + 1) * TUPLE_SIZE], 'big')
+              posting_list.append((doc_id, tf))
+          return posting_list
+
+
+    def get_candidate_documents(self, query_to_search, index):
+      candidates = set()
+      candidates_dict = {}
+      for term in np.unique(query_to_search):
+          if term in index.df:
+              all_res = self.get_posting_list(index, term)
+              candidates_dict.update({term: dict(all_res)})
+              candidates.update([x[0] for x in all_res])
+      return candidates, candidates_dict
+
+
+    def posting_lists_iter_for_word(self, w, bucket_name):
         """ A generator that reads one posting list from disk and yields 
             a (word:str, [(doc_id:int, tf:int), ...]) tuple.
         """
         with closing(MultiFileReader()) as reader:
+            for w, locs in self.posting_locs[w]:
+                b = reader.read(locs, self.df[w] * TUPLE_SIZE, bucket_name)
+                posting_list = []
+                for i in range(self.df[w]):
+                    doc_id = int.from_bytes(b[i*TUPLE_SIZE:i*TUPLE_SIZE+4], 'big')
+                    tf = int.from_bytes(b[i*TUPLE_SIZE+4:(i+1)*TUPLE_SIZE], 'big')
+                    posting_list.append((doc_id, tf))
+                yield w, posting_list
+
+    def posting_lists_iter(self, bucket_name=None):
+        """ A generator that reads one posting list from disk and yields 
+            a (word:str, [(doc_id:int, tf:int), ...]) tuple.
+        """
+        if bucket_name is None:
+            bucket_name = self.bucket_name
+        with closing(MultiFileReader()) as reader:
             for w, locs in self.posting_locs.items():
-                b = reader.read(locs[0], self.df[w] * TUPLE_SIZE, bucket_name)
+                b = reader.read(locs, self.df[w] * TUPLE_SIZE, bucket_name)
                 posting_list = []
                 for i in range(self.df[w]):
                     doc_id = int.from_bytes(b[i*TUPLE_SIZE:i*TUPLE_SIZE+4], 'big')
@@ -207,3 +285,4 @@ class InvertedIndex:
         blob_posting_locs = bucket.blob(f"postings_gcp/{bucket_id}_posting_locs.pickle")
         blob_posting_locs.upload_from_filename(f"{bucket_id}_posting_locs.pickle")
     
+
