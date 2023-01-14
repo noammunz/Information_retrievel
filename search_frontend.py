@@ -10,59 +10,59 @@ from nltk.corpus import stopwords
 import json
 nltk.download('stopwords')
 
-client = storage.Client()
-print('loading bx_title_index')
-bucket = client.get_bucket('bx_pickles')
-idx_title = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
-idx_title.DL = idx_title.dl
+# client = storage.Client()
+# print('loading bx_title_index')
+# bucket = client.get_bucket('bx_pickles')
+# idx_title = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
+# idx_title.DL = idx_title.dl
 
-print('loading bx_body_index')
-idx_body = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
-idx_body.DL = idx_body.dl
+# print('loading bx_body_index')
+# idx_body = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
+# idx_body.DL = idx_body.dl
 
-print('loading bx_title_bigram_index')
-idx_title2 = pickle.loads(bucket.get_blob('bx_title_bigram_index_index.pkl').download_as_string())
-idx_title2.DL = idx_title2.dl
+# print('loading bx_title_bigram_index')
+# idx_title2 = pickle.loads(bucket.get_blob('bx_title_bigram_index_index.pkl').download_as_string())
+# idx_title2.DL = idx_title2.dl
 
-print('loading bx_body_bigram_index')
-idx_body2 = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
-idx_body2.DL = idx_body2.dl
+# print('loading bx_body_bigram_index')
+# idx_body2 = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
+# idx_body2.DL = idx_body2.dl
 
-print('loading bx_title_index')
-idx_title_simple = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
-idx_title_simple.DL = idx_title_simple.dl
+# print('loading bx_title_index')
+# idx_title_simple = pickle.loads(bucket.get_blob('bx_title_index_index.pkl').download_as_string())
+# idx_title_simple.DL = idx_title_simple.dl
 
-print('loading bx_body_index')
-idx_body_simple = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
-idx_body_simple.DL = idx_body_simple.dl
+# print('loading bx_body_index')
+# idx_body_simple = pickle.loads(bucket.get_blob('bx_body_index_index.pkl').download_as_string())
+# idx_body_simple.DL = idx_body_simple.dl
 
-# bucket = client.get_bucket('bx_anchor_index')
-# idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
+# # bucket = client.get_bucket('bx_anchor_index')
+# # idx_anchor = pickle.loads(bucket.get_blob('postings_gcp/bx_anchor_index_index.pkl').download_as_string())
 
-print('loading bx_general_bucket')
-bucket = client.get_bucket('bx_general_bucket')
-pv = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
-# pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
-# pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-6d9d8d6e-dd7f-4f30-adfa-248086c99e4e-c000.csv.gz')
-pr = pd.read_csv("""gs://bx_general_bucket/pr/part-00000-6d9d8d6e-dd7f-4f30-adfa-248086c99e4e-c000.csv.gz""",names=['doc_id', 'pr'],header=None)
-# bucket = client.get_bucket('bx_body_index')
-# idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
+# print('loading bx_general_bucket')
+# bucket = client.get_bucket('bx_general_bucket')
+# pv = pickle.loads(bucket.get_blob('wid2pv.pkl').download_as_string())
+# # pr = pd.read_csv(bucket.get_blob('pr/part-00000-a5ad5b2e-27ae-46dc-b038-36bc2f23b2c9-c000.csv.gz').download_as_string())
+# # pr = pd.read_csv('gs://bx_general_bucket/pr/part-00000-6d9d8d6e-dd7f-4f30-adfa-248086c99e4e-c000.csv.gz')
+# pr = pd.read_csv("""gs://bx_general_bucket/pr/part-00000-6d9d8d6e-dd7f-4f30-adfa-248086c99e4e-c000.csv.gz""",names=['doc_id', 'pr'],header=None)
+# # bucket = client.get_bucket('bx_body_index')
+# # idx_body_simple = pickle.loads(bucket.get_blob('postings_gcp/bx_body_index_index.pkl').download_as_string())
 
-# idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
-# idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
-# idx_body2 = pickle.loads(bucket.get_blob('index_body2_inverted_index.pkl').download_as_string())
-# idx_title_simple = pickle.loads(bucket.get_blob('index_simple_title_inverted_index.pkl').download_as_string())
-# idx_body_simple = pickle.loads(bucket.get_blob('index_simple_body_inverted_index.pkl').download_as_string())
-# idx_anchor = pickle.loads(bucket.get_blob('index_anchor_bucket.pkl').download_as_string())
-# pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
-# pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
+# # idx_body = pickle.loads(bucket.get_blob('index_body_inverted_index.pkl').download_as_string())
+# # idx_title2 = pickle.loads(bucket.get_blob('index_title2_inverted_index.pkl').download_as_string())
+# # idx_body2 = pickle.loads(bucket.get_blob('index_body2_inverted_index.pkl').download_as_string())
+# # idx_title_simple = pickle.loads(bucket.get_blob('index_simple_title_inverted_index.pkl').download_as_string())
+# # idx_body_simple = pickle.loads(bucket.get_blob('index_simple_body_inverted_index.pkl').download_as_string())
+# # idx_anchor = pickle.loads(bucket.get_blob('index_anchor_bucket.pkl').download_as_string())
+# # pv = pickle.loads(bucket.get_blob('pageviews-202108-user.pkl').download_as_string())
+# # pr = pickle.loads(bucket.get_blob('PageRankWiki.pkl').download_as_string())
 
-# Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
-# print('idx_body.DL {}'.format(idx_body.dl))
-print('building bm25 class')
-bm25_body = BM25_from_index(idx_body)
+# # Mapping = pickle.loads(bucket.get_blob('id_title1.pkl').download_as_string())
+# # print('idx_body.DL {}'.format(idx_body.dl))
+# print('building bm25 class')
+# bm25_body = BM25_from_index(idx_body)
 
-# idx_body_simple.DL=idx_body.dl
+idx_body_simple.DL=idx_body.dl
 
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, **options):
@@ -146,12 +146,12 @@ def search():
         list of up to 100 search results, ordered from best to worst where each 
         element is a tuple (wiki_id, title).
     '''
-    res = []
+    res = ['hello']
     query = request.args.get('query', '')
     if len(query) == 0:
         return jsonify(res)
     # BEGIN SOLUTION
-    res = GetResult(query, idx_title, idx_title2, idx_body, idx_body2, bm25_body, pr, pv)[:100]
+#     res = GetResult(query, idx_title, idx_title2, idx_body, idx_body2, bm25_body, pr, pv)[:100]
     # res = _idToValuesMapping(res)
     # END SOLUTION
     return jsonify(res)
