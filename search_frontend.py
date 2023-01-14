@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+import inverted_index_gcp
+from se import search_engine
 
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, **options):
@@ -7,6 +9,20 @@ class MyFlaskApp(Flask):
 app = MyFlaskApp(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
+# init search engine
+cur_se = search_engine()
+cur_se.init_engine(load_only_title=False)
+
+params = {'max_docs_from_binary_title': 3256,
+            'max_docs_from_binary_body': 4972,
+            'bm25_body_weight': 8.758931506896115,
+            'bm25_title_weight': 9.613397200045531,
+            'bm25_body_bi_weight': 2.56182266410080242,
+            'bm25_title_bi_weight': 7.113560860834498,
+            'body_cosine_score': 0.5194388365584155,
+            'title_cosine_score': 2.5194388365584155,
+            'pr_weight': 3.50590682856010363,
+            'pv_weight': 1.291527285915291}
 
 @app.route("/search")
 def search():
@@ -31,7 +47,7 @@ def search():
     if len(query) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-    res = 'hello world'
+    res = cur_se.full_search_(query,params)
     # END SOLUTION
     return jsonify(res)
 
