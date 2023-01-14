@@ -13,16 +13,16 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 cur_se = search_engine()
 cur_se.init_engine(load_only_title=False)
 
-params = {'max_docs_from_binary_title': 3256,
-            'max_docs_from_binary_body': 4972,
-            'bm25_body_weight': 8.758931506896115,
-            'bm25_title_weight': 9.613397200045531,
-            'bm25_body_bi_weight': 2.56182266410080242,
-            'bm25_title_bi_weight': 7.113560860834498,
-            'body_cosine_score': 0.5194388365584155,
+params = {'max_docs_from_binary_title': 4727,
+            'max_docs_from_binary_body': 2917,
+            'bm25_body_weight': 5.654755146824988,
+            'bm25_title_weight': 9.896663832942783,
+            'bm25_body_bi_weight': 2.774971334073361,
+            'bm25_title_bi_weight': 8.063345791389796,
+            'body_cosine_score': 2.9105838962407633,
             'title_cosine_score': 2.5194388365584155,
-            'pr_weight': 3.50590682856010363,
-            'pv_weight': 1.291527285915291}
+            'pr_weight': 3.3311728854498797,
+            'pv_weight': 6.013822435041325}
 
 @app.route("/search")
 def search():
