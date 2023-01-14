@@ -62,7 +62,7 @@ nltk.download('stopwords')
 # print('building bm25 class')
 # bm25_body = BM25_from_index(idx_body)
 
-idx_body_simple.DL=idx_body.dl
+# idx_body_simple.DL=idx_body.dl
 
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, **options):
