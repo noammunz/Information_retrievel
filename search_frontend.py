@@ -9,20 +9,18 @@ class MyFlaskApp(Flask):
 app = MyFlaskApp(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
-# init search engine
-cur_se = search_engine()
-cur_se.init_engine(load_only_title=False)
 
-params = {'max_docs_from_binary_title': 4727,
-            'max_docs_from_binary_body': 2917,
-            'bm25_body_weight': 5.654755146824988,
-            'bm25_title_weight': 9.896663832942783,
-            'bm25_body_bi_weight': 2.774971334073361,
-            'bm25_title_bi_weight': 8.063345791389796,
-            'body_cosine_score': 2.9105838962407633,
-            'title_cosine_score': 2.5194388365584155,
-            'pr_weight': 3.3311728854498797,
-            'pv_weight': 6.013822435041325}
+
+params = {'max_docs_from_binary_title': 4433,
+            'max_docs_from_binary_body': 1349,
+            'bm25_body_weight': 5.175842946028495,
+            'bm25_title_weight': 2.297919942629382,
+            'bm25_body_bi_weight': 0.9433857458903415,
+            'bm25_title_bi_weight': 5.43406860036612,
+            'body_cosine_score': 4.925136475255385,
+            'title_cosine_score': 0.29963143927827507,
+            'pr_weight': 0.34839354014586377,
+            'pv_weight': 4.740913798917137}
 
 @app.route("/search")
 def search():
@@ -72,7 +70,7 @@ def search_body():
     if len(query) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-
+    res = cur_se.search_body_Q2(query)
     # END SOLUTION
     return jsonify(res)
 
@@ -98,7 +96,7 @@ def search_title():
     if len(query) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-
+    res = cur_se.search_title_Q3(query)
     # END SOLUTION
     return jsonify(res)
 
@@ -125,7 +123,7 @@ def search_anchor():
     if len(query) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-    
+    res = cur_se.search_anchor_Q4(query)
     # END SOLUTION
     return jsonify(res)
 
@@ -150,7 +148,7 @@ def get_pagerank():
     if len(wiki_ids) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-
+    res = cur_se.page_rank_Q5(wiki_ids)
     # END SOLUTION
     return jsonify(res)
 
@@ -177,11 +175,14 @@ def get_pageview():
     if len(wiki_ids) == 0:
       return jsonify(res)
     # BEGIN SOLUTION
-
+    res = cur_se.page_view_Q6(wiki_ids)
     # END SOLUTION
     return jsonify(res)
 
 
 if __name__ == '__main__':
+    # init search engine
+    cur_se = search_engine()
+    cur_se.init_engine(load_only_title=False)
     # run the Flask RESTful API, make the server publicly available (host='0.0.0.0') on port 8080
     app.run(host='0.0.0.0', port=8080, debug=True)
