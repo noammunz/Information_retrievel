@@ -185,4 +185,4 @@ if __name__ == '__main__':
     cur_se = search_engine()
     cur_se.init_engine(load_only_title=False)
     # run the Flask RESTful API, make the server publicly available (host='0.0.0.0') on port 8080
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
