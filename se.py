@@ -113,11 +113,15 @@ class search_engine():
             body_bigram_index = pickle.loads(bucket.get_blob('bx_body_bigram_index_index.pkl').download_as_string())
             idx_body_nf = pickle.loads(bucket.get_blob('bx_body_index_nf_index.pkl').download_as_string())
             anchor_index = pickle.loads(bucket.get_blob('bx_anchor_index_index.pkl').download_as_string())
+            body_no_stem_index = pickle.loads(bucket.get_blob('bx_body_index_no_stemming_index.pkl').download_as_string())
+            title_no_stem_index = pickle.loads(bucket.get_blob('bx_title_index_no_stemming_index.pkl').download_as_string())
 
             self.load_index(body_index, 'body_index')
             self.load_index(body_bigram_index, 'body_bigram_index')
             self.load_index(anchor_index, 'anchor_index')
             self.load_index(idx_body_nf, 'body_index_nf')
+            self.load_index(body_no_stem_index, 'body_no_stem_index')
+            self.load_index(title_no_stem_index, 'title_no_stem_index')
             
         # loading title dictionary
         self.title_dict = pickle.loads(bucket.get_blob('title_dict.pkl').download_as_string())
@@ -148,7 +152,7 @@ class search_engine():
             posting_list.append((doc_id, tf))
         return posting_list
 
-    def get_candidate_documents_and_scores(self,query_to_search,index_name):
+    def get_candidate_documents_and_scores(self,query_to_search,index_name,partial_doc_list=None):
         """
         Generate a dictionary representing a pool of candidate documents for a given query. This function will go through every token in query_to_search
         and fetch the corresponding information (e.g., term frequency, document frequency, etc.') needed to calculate TF-IDF from the posting list.
@@ -178,6 +182,9 @@ class search_engine():
         for term in np.unique(query_to_search):
             if term in self.index_dict[index_name].df:
                 list_of_doc = self.get_posting_list(index_name,term)
+                if (partial_doc_list is not None):
+                    list_of_doc = [value for value in list_of_doc if value in partial_doc_list]
+                    
                 normlized_tfidf = [(doc_id,(freq/self.index_dict[index_name].dl[doc_id])*math.log10(corpus_size/self.index_dict[index_name].df[term])) for doc_id, freq in list_of_doc]
                 
                 for doc_id, tfidf in normlized_tfidf:
@@ -443,14 +450,14 @@ class search_engine():
         
         # cosine similarity section
         # body
-        self.cos_candidates,self.cos_unique_candidates = self.get_candidate_documents_and_scores(tokens,'body_index')
+        self.cos_candidates,self.cos_unique_candidates = self.get_candidate_documents_and_scores(tokens,'body_index',body_candidates)
         if len(self.cos_unique_candidates)>0:
             cos_candidates_to_add = set(self.cos_unique_candidates.keys())
         
         else:
             cos_candidates_to_add = set()
             
-        self.cos_title_candidates,self.cos_title_unique_candidates = self.get_candidate_documents_and_scores(tokens,'title_index')
+        self.cos_title_candidates,self.cos_title_unique_candidates = self.get_candidate_documents_and_scores(tokens,'title_index',title_candidates)
         
         # title
         if len(self.cos_title_unique_candidates)>0:
@@ -645,6 +652,34 @@ class search_engine():
             return bigrams
 
         return list_of_tokens
+    
+    def search_body_Q2(self, query):
+        tokenized_query = self.tokenize(query, bigram=False, stem=False)
+        scores = self.fast_cosine_search(tokenized_query ,'body_no_stem_index', 100, stem=False ,candidates=None,unique_candidates=None)
+        result = [(doc_id, self.title_dict[doc_id]) for doc_id, score in scores]
+        return result
+        
+    def search_title_Q3(self, query):
+        tokenized_query = self.tokenize(query, bigram=False, stem=False)
+        candidates, candidates_for_term = self.get_candidates(tokenized_query, 'title_no_stem_index')
+        scores = [(doc_id, self.binary_score(tokenized_query, candidates_for_term, doc_id)) for doc_id in candidates]
+        scores_sorted = sorted(scores, key=itemgetter(1), reverse=True)
+        result = [(doc_id, self.title_dict[doc_id]) for doc_id, score in scores_sorted]
+        return result
+    
+    def search_anchor_Q4(self, query):
+        tokenized_query = self.tokenize(query, bigram=False, stem=False)
+        candidates, candidates_for_term = self.get_candidates(tokenized_query, 'anchor_index')
+        scores = [(doc_id, self.binary_score(tokenized_query, candidates_for_term, doc_id)) for doc_id in candidates]
+        scores_sorted = sorted(scores, key=itemgetter(1), reverse=True)
+        result = [(doc_id, self.title_dict[doc_id]) for doc_id, score in scores_sorted]
+        return result
+    
+    def page_rank_Q5(self, wiki_ids):
+        return [self.pr[doc_id] for doc_id in wiki_ids]
+    
+    def page_view_Q6(self, wiki_ids):
+        return [self.pv[doc_id] for doc_id in wiki_ids]
 
     
 class BM25_from_index:
