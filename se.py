@@ -469,18 +469,8 @@ class search_engine:
         """
         Full search warpper, calling full_search_ with a given/best params
         """
-        params = {
-            "max_docs_from_binary_title": 4433,
-            "max_docs_from_binary_body": 1349,
-            "bm25_body_weight": 5.175842946028495,
-            "bm25_title_weight": 2.297919942629382,
-            "bm25_body_bi_weight": 0.9433857458903415,
-            "bm25_title_bi_weight": 5.43406860036612,
-            "body_cosine_score": 4.925136475255385,
-            "title_cosine_score": 0.29963143927827507,
-            "pr_weight": 0.34839354014586377,
-            "pv_weight": 4.740913798917137,
-        }
+        params = {'max_docs_from_binary_title': 848, 'max_docs_from_binary_body': 859, 'bm25_body_weight': 8.798177098065569, 'bm25_title_weight': 0.49852365380857405, 'bm25_body_bi_weight': 0.3017628167759724, 'bm25_title_bi_weight': 7.194777117032163, 'body_cosine_score': 3.3006609064263843, 'title_cosine_score': 4.252156540716102, 'pr_weight': 2.0879280338073336, 'pv_weight': 5.483394450683551}
+
 
         return self.full_search_(query, params)
 
