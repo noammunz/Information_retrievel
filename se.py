@@ -709,7 +709,6 @@ class search_engine:
     def normlize_scores(self, docs, *args):
         """
         normailze lists of scores using min-max normalization method.
-        todo
         """
         try:
             doc_scores = {doc: np.array([0] * len(args), dtype=float) for doc in docs}
