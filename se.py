@@ -544,17 +544,18 @@ class search_engine:
 
             # cosine similarity section
             # body
-            (
-                self.cos_candidates,
-                self.cos_unique_candidates,
-            ) = self.get_candidate_documents_and_scores(
-                tokens, "body_index", body_candidates
-            )
-            if len(self.cos_unique_candidates) > 0:
-                cos_candidates_to_add = set(self.cos_unique_candidates.keys())
-
+            cos_candidates_to_add = set()
+            if len(body_candidates) < 10:
+                (
+                    self.cos_candidates,
+                    self.cos_unique_candidates,
+                ) = self.get_candidate_documents_and_scores(
+                    tokens, "body_index", body_candidates
+                )
+                if len(self.cos_unique_candidates) > 0:
+                    cos_candidates_to_add = set(self.cos_unique_candidates.keys())
             else:
-                cos_candidates_to_add = set()
+                self.cos_unique_candidates = set()
 
             (
                 self.cos_title_candidates,
@@ -617,17 +618,6 @@ class search_engine:
                 "title_index"
             ].search_with_candidates(tokens, self.all_relevent_docs)
 
-            self.body_cosine_score = dict(
-                self.fast_cosine_search(
-                    tokens,
-                    "body_index",
-                    params["max_docs_from_binary_body"],
-                    True,
-                    self.cos_candidates,
-                    self.cos_unique_candidates,
-                )
-            )
-
             self.title_cosine_score = dict(
                 self.fast_cosine_search(
                     tokens,
@@ -638,6 +628,20 @@ class search_engine:
                     self.cos_title_unique_candidates,
                 )
             )
+
+            if len(self.cos_unique_candidates) > 0:
+                self.body_cosine_score = dict(
+                    self.fast_cosine_search(
+                        tokens,
+                        "body_index",
+                        params["max_docs_from_binary_body"],
+                        True,
+                        self.cos_candidates,
+                        self.cos_unique_candidates,
+                    )
+                )
+            else:
+                self.body_cosine_score = self.title_cosine_score
 
             # bi-gram calc section
             self.bi_gram_rel_docs = set().union(
@@ -694,6 +698,7 @@ class search_engine:
 
         except Exception as e:
             print("error when calling full_search_ query:{}".format(query))
+            raise e
             return []
 
     #             raise e
@@ -1035,3 +1040,4 @@ class BM25_from_index:
                             numerator / denominator
                         )
         return doc_scores
+
