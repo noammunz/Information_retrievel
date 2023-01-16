@@ -698,7 +698,7 @@ class search_engine:
 
         except Exception as e:
             print("error when calling full_search_ query:{}".format(query))
-            raise e
+#             raise e
             return []
 
     #             raise e
