@@ -686,8 +686,8 @@ class search_engine:
 
             total_time = (datetime.now() - start).total_seconds()
             print("total search time {} seconds".format(total_time))
-
-            return sorted(
+            
+            scores_sorted = sorted(
                 [
                     (doc_id, np.dot(self.scores[doc_id], self.weights))
                     for doc_id, score in self.scores.items()
@@ -695,6 +695,9 @@ class search_engine:
                 key=lambda x: x[1],
                 reverse=True,
             )[:100]
+            result = [(doc_id, self.title_dict[doc_id]) for doc_id, score in scores_sorted]
+
+            return result
 
         except Exception as e:
             print("error when calling full_search_ query:{}".format(query))
