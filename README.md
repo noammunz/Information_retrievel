@@ -14,15 +14,15 @@ To optimise result accuracy and retrieval time we applied the following scoring 
 </br>
 The following code includes:</br>
 </br>
-- se.py - Contains initialization of the search engine, loading related indices, and waiting for query requests. All search methods (BM25, cosine similarity, ect) and all required search functions are available here.</br>
+- <b>se.py</b> - Contains initialization of the search engine, loading related indices, and waiting for query requests. All search methods (BM25, cosine similarity, ect) and all required search functions are available here.</br>
 </br>
-- search_frontend.py - wrapper for Flask that allows HTTP requests to be sent.</br>
+- <b>search_frontend.py</b> - wrapper for Flask that allows HTTP requests to be sent.</br>
 </br>
-- se_test.py - a test script that runs all train queries, returns precision, latency, and other performance measures.</br>
+- <b>se_test.py</b> - a test script that runs all train queries, returns precision, latency, and other performance measures.</br>
 </br>
-- unit_tests.ipynb - a notebook that calls for train queries and runs optimization modules to find the best parameters for our engine.</br>
+- <b>unit_tests.ipynb</b> - a notebook that calls for train queries and runs optimization modules to find the best parameters for our engine.</br>
 </br>
-- inverted_index_gcp.py - Readers and writers for interacting with the bucket's indices and binary files.</br>
+- <b>inverted_index_gcp.py</b> - Readers and writers for interacting with the bucket's indices and binary files.</br>
 </br>
 - Google buckets are used to store inverted indices and binary files (links are included in the project report pdf file):</br>
 </br>
